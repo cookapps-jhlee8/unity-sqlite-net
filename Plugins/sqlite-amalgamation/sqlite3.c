@@ -17,6 +17,7 @@
 ** language. The code for the "sqlite3" command-line shell is also in a
 ** separate file. This file contains only code for the core SQLite library.
 */
+#define SQLITE_HAS_CODEC 1
 #define SQLITE_CORE 1
 #define SQLITE_AMALGAMATION 1
 #ifndef SQLITE_PRIVATE
@@ -108846,7 +108847,7 @@ int sqlcipher_openssl_setup(sqlcipher_provider *p) {
 **
 */
 /* BEGIN SQLCIPHER */
-#ifdef SQLITE_HAS_CODEC
+#ifdef SQLITE_HAS_CODEC  // 암호화 사용
 #ifdef SQLCIPHER_CRYPTO_CC
 /* #include "crypto.h" */
 /* #include "sqlcipher.h" */
