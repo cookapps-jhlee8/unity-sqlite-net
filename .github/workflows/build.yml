@@ -42,6 +42,8 @@ jobs:
             Plugins/lib/${{ matrix.platform }}/openssl/**/*.so
             build/openssl/**/*.a
             build/openssl/**/*.so
+            /src/openssl/build/**/*.a
+            /src/openssl/build/**/*.so
 
   build_with_windows:
     name: windows
