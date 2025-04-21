@@ -40,6 +40,8 @@ jobs:
             Plugins/lib/${{ matrix.platform }}/**/*.so
             Plugins/lib/${{ matrix.platform }}/openssl/**/*.a
             Plugins/lib/${{ matrix.platform }}/openssl/**/*.so
+            build/openssl/**/*.a
+            build/openssl/**/*.so
 
   build_with_windows:
     name: windows
