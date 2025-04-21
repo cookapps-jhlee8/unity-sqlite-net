@@ -50,6 +50,9 @@ RUN for ABI in \
 RUN mkdir -p /output/openssl
 RUN cp -r /src/openssl/build/* /output/openssl/
 
-# 6. 작업 디렉토리 설정
+# 6. OpenSSL 빌드 결과 확인
+RUN ls -R /output/openssl
+
+# 7. 작업 디렉토리 설정
 WORKDIR /output
 
