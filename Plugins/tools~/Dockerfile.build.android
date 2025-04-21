@@ -21,6 +21,8 @@ RUN curl -SLO https://dl.google.com/android/repository/android-ndk-${NDK_VERSION
     && rm android-ndk-${NDK_VERSION}-linux.zip
 
 ENV ANDROID_NDK_ROOT=/opt/ndk
+ENV PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+
 
 # 3. OpenSSL 소스 다운로드
 WORKDIR /src
@@ -33,11 +35,18 @@ RUN for ABI in \
     set -- $ABI; \
     ABI_NAME=$1; CONFIGURE_NAME=$2; HOST=$3; \
     echo "====> Building OpenSSL for $ABI_NAME"; \
-    export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH; \
-    PATH=$PATH which $HOST21-clang || (echo "❌ $HOST21-clang not found!" && exit 1); \
-    PATH=$PATH which $HOST-ar || (echo "❌ $HOST-ar not found!" && exit 1); \
+    TOOLCHAIN=/opt/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin; \
+    export PATH=$TOOLCHAIN:$PATH; \
+    CC_BIN=$TOOLCHAIN/$HOST21-clang; \
+    AR_BIN=$TOOLCHAIN/$HOST-ar; \
+    echo "CC: $$CC_BIN"; echo "AR: $$AR_BIN"; \
+    if [ ! -f "$$CC_BIN" ]; then echo "❌ $$CC_BIN not found"; exit 1; fi; \
+    if [ ! -f "$$AR_BIN" ]; then echo "❌ $$AR_BIN not found"; exit 1; fi; \
     cd /src/openssl && make clean || true; \
-    PATH=$PATH ./Configure $CONFIGURE_NAME no-shared no-tests --prefix=/src/openssl/build/$ABI_NAME && \
-    make CC=$HOST21-clang AR=$HOST-ar -j$(nproc) && \
+    ./Configure $$CONFIGURE_NAME no-shared no-tests --prefix=/src/openssl/build/$$ABI_NAME && \
+    make CC=$$CC_BIN AR=$$AR_BIN -j$(nproc) && \
     make install_sw; \
   done
+
+
+
