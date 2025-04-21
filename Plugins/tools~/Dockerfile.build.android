@@ -23,7 +23,6 @@ RUN curl -SLO https://dl.google.com/android/repository/android-ndk-${NDK_VERSION
 ENV ANDROID_NDK_ROOT=/opt/ndk
 ENV PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
 
-
 # 3. OpenSSL 소스 다운로드
 WORKDIR /src
 RUN git clone --depth=1 --branch openssl-3.4.1 https://github.com/openssl/openssl.git
@@ -46,4 +45,11 @@ RUN for ABI in \
     make CC=$CC_BIN AR=$AR_BIN -j$(nproc) && \
     make install_sw; \
   done
+
+# 5. OpenSSL 빌드 결과 복사
+RUN mkdir -p /output/openssl
+RUN cp -r /src/openssl/build/* /output/openssl/
+
+# 6. 작업 디렉토리 설정
+WORKDIR /output
 
