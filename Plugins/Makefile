@@ -70,13 +70,13 @@ endif
 lib/android/arm64/libgilzoide-sqlite-net.so: \
   CFLAGS += -I/output/openssl/arm64-v8a/include
 lib/android/arm64/libgilzoide-sqlite-net.so: \
-  LDFLAGS += /output/openssl/build/arm64-v8a/lib/libcrypto.a
+  LDFLAGS += /output/openssl/arm64-v8a/lib/libcrypto.a
 
 # arm32
 lib/android/arm32/libgilzoide-sqlite-net.so: \
   CFLAGS += -I/output/openssl/armeabi-v7a/include
 lib/android/arm32/libgilzoide-sqlite-net.so: \
-  LDFLAGS += /output/openssl/build/armeabi-v7a/lib/libcrypto.a
+  LDFLAGS += /output/openssl/armeabi-v7a/lib/libcrypto.a
 
 lib/android/%/libgilzoide-sqlite-net.so: CFLAGS += -fPIC
 lib/android/%/libgilzoide-sqlite-net.so: LINKFLAGS += -shared -lm -Wl,-z,max-page-size=16384
