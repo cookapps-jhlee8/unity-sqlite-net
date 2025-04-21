@@ -38,6 +38,8 @@ jobs:
             Plugins/lib/${{ matrix.platform }}/**/*.dll
             Plugins/lib/${{ matrix.platform }}/**/*.dylib
             Plugins/lib/${{ matrix.platform }}/**/*.so
+            Plugins/lib/${{ matrix.platform }}/openssl/**/*.a
+            Plugins/lib/${{ matrix.platform }}/openssl/**/*.so
 
   build_with_windows:
     name: windows
