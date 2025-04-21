@@ -30,6 +30,9 @@
 ** the version number) and changes its name to "sqlite3.h" as
 ** part of the build process.
 */
+
+#define SQLITE_HAS_CODEC 1 // 암호화 사용
+
 #ifndef SQLITE3_H
 #define SQLITE3_H
 #include <stdarg.h>     /* Needed for the definition of va_list */
