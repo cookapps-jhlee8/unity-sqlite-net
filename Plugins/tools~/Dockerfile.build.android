@@ -31,7 +31,9 @@ RUN git clone --depth=1 --branch openssl-3.4.1 https://github.com/openssl/openss
 # 4. OpenSSL 빌드 (arm64-v8a, armeabi-v7a 전용)
 RUN for ABI in \
     "arm64-v8a android-arm64 aarch64-linux-android" \
-    "armeabi-v7a android-arm armv7a-linux-androideabi"; do \
+    "armeabi-v7a android-arm armv7a-linux-androideabi"; do
+    TOOLCHAIN=/opt/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin
+    export PATH=$TOOLCHAIN:$PATH \
     set -- $ABI; \
     ABI_NAME=$1; CONFIGURE_NAME=$2; HOST=$3; \
     echo "====> Building OpenSSL for $ABI_NAME"; \
