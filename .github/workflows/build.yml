@@ -52,8 +52,6 @@ jobs:
           update: true
           install: >-
             mingw-w64-x86_64-gcc
-            mingw-w64-i686-gcc
-            mingw-w64-aarch64-gcc
             mingw-w64-x86_64-make
             mingw-w64-x86_64-openssl
 
@@ -64,13 +62,13 @@ jobs:
           LDFLAGS: "-L/mingw64/lib -lcrypto"
         run: |
           cd Plugins
-          make all-windows-llvm-mingw
+          make windows-mingw-x86_64
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: gilzoide-sqlite-net-windows
-          path: Plugins/lib/windows/**/*.dll
+          path: Plugins/lib/windows/x86_64/*.dll
         
   build_with_macos:
     name: macOS
