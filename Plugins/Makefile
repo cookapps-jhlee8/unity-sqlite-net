@@ -10,6 +10,7 @@ RUN_ID ?=
 
 # 암호화 라이브러리 설정
 CFLAGS += -DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation
+LDFLAGS += -lcrypto
 
 ifeq ($(DEBUG),1)
 	CFLAGS += -O0 -g -DDEBUG
