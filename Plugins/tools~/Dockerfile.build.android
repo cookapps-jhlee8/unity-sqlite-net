@@ -3,7 +3,7 @@ FROM debian:12-slim
 
 ARG NDK_VERSION=r26c
 
-# 필수 도구 설치
+# 1. 필수 도구 설치
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     unzip \
@@ -14,8 +14,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Android NDK 설치
-RUN curl -SLO http://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux.zip \
+# 2. Android NDK 설치
+RUN curl -SLO https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux.zip \
     && unzip android-ndk-${NDK_VERSION}-linux.zip \
     && mv android-ndk-${NDK_VERSION} /opt/ndk \
     && rm android-ndk-${NDK_VERSION}-linux.zip
@@ -23,20 +23,22 @@ RUN curl -SLO http://dl.google.com/android/repository/android-ndk-${NDK_VERSION}
 ENV ANDROID_NDK_ROOT=/opt/ndk
 ENV PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
 
-# OpenSSL 소스 클론
+# 3. OpenSSL 소스 다운로드
 WORKDIR /src
 RUN git clone --depth=1 --branch openssl-3.4.1 https://github.com/openssl/openssl.git
 
-# ✅ arm 계열 (arm64-v8a, armeabi-v7a)만 빌드
+# 4. OpenSSL 빌드 (arm64-v8a, armeabi-v7a 전용)
 RUN for ABI in \
     "arm64-v8a android-arm64 aarch64-linux-android" \
     "armeabi-v7a android-arm armv7a-linux-androideabi"; do \
     set -- $ABI; \
-    ABI_NAME=$1 CONFIGURE=$2 HOST=$3; \
+    ABI_NAME=$1; \
+    CONFIGURE_NAME=$2; \
+    HOST=$3; \
+    echo "====> Building OpenSSL for $ABI_NAME"; \
     cd /src/openssl && make clean || true; \
-    CC=$HOST21-clang \
-    AR=$HOST-ar \
-    ./Configure $CONFIGURE no-shared no-tests --prefix=/src/openssl/build/$ABI_NAME && \
+    CC=$HOST21-clang AR=$HOST-ar \
+    ./Configure $CONFIGURE_NAME no-shared no-tests --prefix=/src/openssl/build/$ABI_NAME && \
     make -j$(nproc) && \
     make install_sw; \
   done
