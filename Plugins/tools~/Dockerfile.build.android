@@ -38,7 +38,7 @@ RUN for ABI in \
     TOOLCHAIN=/opt/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin; \
     export PATH=$TOOLCHAIN:$PATH; \
     CC_BIN=$TOOLCHAIN/${HOST}21-clang; \
-    AR_BIN=$TOOLCHAIN/${HOST}-ar; \
+    AR_BIN=$TOOLCHAIN/llvm-ar; \
     echo "CC: $CC_BIN"; echo "AR: $AR_BIN"; \
     if [ ! -f "$CC_BIN" ]; then echo "❌ CC_BIN not found: $CC_BIN"; exit 1; fi; \
     if [ ! -f "$AR_BIN" ]; then echo "❌ AR_BIN not found: $AR_BIN"; exit 1; fi; \
@@ -47,7 +47,3 @@ RUN for ABI in \
     make CC=$CC_BIN AR=$AR_BIN -j$(nproc) && \
     make install_sw; \
   done
-
-
-
-
