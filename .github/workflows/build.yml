@@ -126,7 +126,13 @@ jobs:
         env:
           CFLAGS: "-DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation -I${{ github.workspace }}/openssl/build/universal/include"
           LDFLAGS: "-L${{ github.workspace }}/openssl/build/universal/lib -lcrypto"
-        run: make -C Plugins all-apple
+        run: |
+          # 디렉토리 구조 확인
+          find openssl/build -type d | sort
+          find openssl/build -name "*.a" | sort
+          # GitHub Actions 환경에서는 상대 경로를 절대 경로로 대체
+          cd Plugins
+          make all-apple OPENSSL_DIR="${{ github.workspace }}/openssl"
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
