@@ -39,6 +39,37 @@ jobs:
             Plugins/lib/${{ matrix.platform }}/**/*.dylib
             Plugins/lib/${{ matrix.platform }}/**/*.so
 
+  build_with_windows:
+    name: windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup MSYS2 and OpenSSL
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-make
+            mingw-w64-x86_64-openssl
+
+      - name: Build with mingw
+        shell: msys2 {0}
+        env:
+          CFLAGS: "-DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation -I/mingw64/include"
+          LDFLAGS: "-L/mingw64/lib -lcrypto"
+        run: |
+          cd Plugins
+          make all-windows-llvm-mingw
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gilzoide-sqlite-net-windows
+          path: Plugins/lib/windows/**/*.dll
+        
   build_with_macos:
     name: macOS
     runs-on: macos-latest
