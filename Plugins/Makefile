@@ -54,8 +54,8 @@ lib/linux/%/libgilzoide-sqlite-net.so: lib/linux/%/sqlite3.o~ | lib/linux/%
 	$(CC) -o $@ $^ $(LINKFLAGS)
 
 # macOS
-lib/macos/libgilzoide-sqlite-net.dylib: CFLAGS += -arch arm64 -arch x86_64 -isysroot $(shell xcrun --show-sdk-path --sdk macosx)
-lib/macos/libgilzoide-sqlite-net.dylib: LINKFLAGS += -shared -arch arm64 -arch x86_64
+lib/macos/libgilzoide-sqlite-net.dylib: CFLAGS += -arch arm64 -arch x86_64 -isysroot $(shell xcrun --show-sdk-path --sdk macosx) -I$(CURDIR)/openssl/build/universal/include
+lib/macos/libgilzoide-sqlite-net.dylib: LINKFLAGS += -shared -arch arm64 -arch x86_64 -L$(CURDIR)/openssl/build/universal/lib -lcrypto
 lib/macos/libgilzoide-sqlite-net.dylib: lib/macos/sqlite3.o~ | lib/macos
 	$(CC) -o $@ $^ $(LINKFLAGS)
 ifdef MACOS_CODESIGN_SIGNATURE

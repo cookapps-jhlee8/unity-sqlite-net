@@ -113,6 +113,15 @@ jobs:
             build/x86_64/lib/libssl.a \
             -output build/universal/lib/libssl.a
           cp -R build/arm64/include build/universal/include
+
+      - name: Check OpenSSL paths
+        run: |
+          ls -la openssl/build/universal/lib/
+          ls -la openssl/build/universal/include/openssl/
+          # openssl 경로 확인
+          echo "OpenSSL 라이브러리 존재 여부: $(test -f openssl/build/universal/lib/libcrypto.a && echo 'Yes' || echo 'No')"
+          echo "OpenSSL 헤더 존재 여부: $(test -f openssl/build/universal/include/openssl/crypto.h && echo 'Yes' || echo 'No')"
+
       - name: Build
         env:
           CFLAGS: "-DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation -I${{ github.workspace }}/openssl/build/universal/include"
