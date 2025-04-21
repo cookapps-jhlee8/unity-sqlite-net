@@ -44,12 +44,45 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Install OpenSSL
+      - name: Install dependencies
         run: |
-          brew install openssl@3
-      - name: Check OpenSSL
+          brew install perl make
+
+      - name: Clone OpenSSL
         run: |
-          lipo -info /opt/homebrew/opt/openssl@3/lib/libcrypto.dylib
+          git clone https://github.com/openssl/openssl.git
+          cd openssl
+          git checkout openssl-3.4.1
+
+      - name: Build OpenSSL for arm64
+        run: |
+          cd openssl
+          ./Configure darwin64-arm64-cc no-shared no-tests --prefix=$PWD/build/arm64
+          make clean
+          make -j$(sysctl -n hw.ncpu)
+          make install_sw
+
+      - name: Build OpenSSL for x86_64
+        run: |
+          cd openssl
+          ./Configure darwin64-x86_64-cc no-shared no-tests --prefix=$PWD/build/x86_64
+          make clean
+          make -j$(sysctl -n hw.ncpu)
+          make install_sw
+
+      - name: Create fat (universal) OpenSSL libraries
+        run: |
+          cd openssl
+          mkdir -p build/universal/lib
+          lipo -create \
+            build/arm64/lib/libcrypto.a \
+            build/x86_64/lib/libcrypto.a \
+            -output build/universal/lib/libcrypto.a
+          lipo -create \
+            build/arm64/lib/libssl.a \
+            build/x86_64/lib/libssl.a \
+            -output build/universal/lib/libssl.a
+          cp -R build/arm64/include build/universal/include
       - name: Build
         env:
           CFLAGS: "-DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation -I/opt/homebrew/opt/openssl@3/include"
