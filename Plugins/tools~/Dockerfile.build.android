@@ -31,21 +31,19 @@ RUN git clone --depth=1 --branch openssl-3.4.1 https://github.com/openssl/openss
 # 4. OpenSSL 빌드 (arm64-v8a, armeabi-v7a 전용)
 RUN for ABI in \
     "arm64-v8a android-arm64 aarch64-linux-android" \
-    "armeabi-v7a android-arm armv7a-linux-androideabi"; do
-    TOOLCHAIN=/opt/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin
-    export PATH=$TOOLCHAIN:$PATH \
+    "armeabi-v7a android-arm armv7a-linux-androideabi"; do \
     set -- $ABI; \
     ABI_NAME=$1; CONFIGURE_NAME=$2; HOST=$3; \
-    echo "====> Building OpenSSL for $ABI_NAME"; \
     TOOLCHAIN=/opt/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin; \
     export PATH=$TOOLCHAIN:$PATH; \
     CC_BIN=$TOOLCHAIN/${HOST}21-clang; \
     AR_BIN=$TOOLCHAIN/llvm-ar; \
     echo "CC: $CC_BIN"; echo "AR: $AR_BIN"; \
-    if [ ! -f "$CC_BIN" ]; then echo "❌ CC_BIN not found: $CC_BIN"; exit 1; fi; \
-    if [ ! -f "$AR_BIN" ]; then echo "❌ AR_BIN not found: $AR_BIN"; exit 1; fi; \
+    [ -f "$CC_BIN" ] || (echo "❌ CC not found: $CC_BIN" && exit 1); \
+    [ -f "$AR_BIN" ] || (echo "❌ AR not found: $AR_BIN" && exit 1); \
     cd /src/openssl && make clean || true; \
     ./Configure $CONFIGURE_NAME no-shared no-tests --prefix=/src/openssl/build/$ABI_NAME && \
     make CC=$CC_BIN AR=$AR_BIN -j$(nproc) && \
     make install_sw; \
   done
+
