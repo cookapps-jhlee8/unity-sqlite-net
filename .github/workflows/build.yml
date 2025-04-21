@@ -52,8 +52,9 @@ jobs:
           update: true
           install: >-
             mingw-w64-x86_64-gcc
+            mingw-w64-i686-gcc
+            mingw-w64-aarch64-gcc
             mingw-w64-x86_64-make
-            make
             mingw-w64-x86_64-openssl
 
       - name: Build with mingw
