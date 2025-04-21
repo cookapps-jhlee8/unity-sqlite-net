@@ -159,21 +159,9 @@ ios-universal: lib/ios/libgilzoide-sqlite-net.a
 source: $(SQLITE_NET_DEST)/License.txt $(SQLITE_NET_DEST)/AssemblyInfo.cs $(SQLITE_NET_DEST)/SQLite.cs $(SQLITE_NET_DEST)/SQLiteAsync.cs
 
 all-android: android-arm64 android-arm32 # android-x86_64 android-x86
+all-ios: ios-arm64 ios-universal
+all-macos: macos-universal
 all-apple: all-macos all-ios
-	@mkdir -p lib/macos
-
-	$(CC) -c -o lib/macos/sqlite3.o~ sqlite-amalgamation/sqlite3.c \
-		$(CFLAGS) -arch arm64 -arch x86_64 \
-		-isysroot $(shell xcrun --sdk macosx --show-sdk-path)
-
-	$(CC) $(LDFLAGS) \
-		-shared -arch arm64 -arch x86_64 \
-		-o lib/macos/libgilzoide-sqlite-net.dylib \
-		lib/macos/sqlite3.o~
-all-linux: linux-x86_64
-all-windows: windows-x86_64 windows-x86
-all-windows-mingw: windows-mingw-x86_64 windows-mingw-x86
-all-windows-llvm-mingw: windows-mingw-x86_64 windows-mingw-x86 windows-mingw-arm64
 
 # Dockerized builds
 docker-all-android:
