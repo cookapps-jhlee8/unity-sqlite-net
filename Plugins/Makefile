@@ -22,12 +22,13 @@ else
 	CFLAGS += -O3 -DNDEBUG
 endif
 
+# BUILD_DIRS에서 iOS 시뮬레이터 제거
 BUILD_DIRS = \
-	lib/windows/x86_64 lib/windows/x86 lib/windows/arm64 \
-	lib/linux/x86_64 lib/linux/x86 \
-	lib/macos \
-	lib/android/arm64 lib/android/arm32 lib/android/x86 lib/android/x86_64 \
-	lib/ios/arm64 lib/ios/x86_64  # iOS 디바이스 및 시뮬레이터용
+    lib/windows/x86_64 lib/windows/x86 lib/windows/arm64 \
+    lib/linux/x86_64 lib/linux/x86 \
+    lib/macos \
+    lib/android/arm64 lib/android/arm32 lib/android/x86 lib/android/x86_64 \
+    lib/ios/arm64  # iOS 디바이스만 지원
 
 SQLITE_SRC = sqlite-amalgamation/sqlite3.c
 SQLITE_NET_SRC = $(wildcard sqlite-net~/src/*.cs) sqlite-net~/LICENSE.txt
@@ -99,31 +100,25 @@ lib/ios/%/libgilzoide-sqlite-net.a: lib/ios/%/sqlite3.o~ | lib/ios/%
 # iOS 디바이스 (arm64)
 lib/ios/arm64/libgilzoide-sqlite-net.a: CFLAGS += -arch arm64 -isysroot $(shell xcrun --sdk iphoneos --show-sdk-path) -fPIC -fembed-bitcode
 lib/ios/arm64/libgilzoide-sqlite-net.a: AR = $(shell xcrun -f ar)
-lib/ios/arm64/libgilzoide-sqlite-net.a: CC = $(shell xcrun -f --sdk iphoneos clang)
+lib/ios/arm64/libgilzoide-sqlite-net.a: CC = $(shell xcrun -f clang)
 
-# iOS 시뮬레이터 (x86_64)
-lib/ios/x86_64/libgilzoide-sqlite-net.a: CFLAGS += -arch x86_64 -isysroot $(shell xcrun --sdk iphonesimulator --show-sdk-path) -fPIC 
-lib/ios/x86_64/libgilzoide-sqlite-net.a: AR = $(shell xcrun -f ar)
-lib/ios/x86_64/libgilzoide-sqlite-net.a: CC = $(shell xcrun -f --sdk iphonesimulator clang)
+# iOS 시뮬레이터 관련 부분 제거
 
-# iOS 통합 정적 라이브러리 (디바이스+시뮬레이터)
-lib/ios/libgilzoide-sqlite-net.a: lib/ios/arm64/libgilzoide-sqlite-net.a lib/ios/x86_64/libgilzoide-sqlite-net.a
+# iOS 통합 정적 라이브러리 - 디바이스만 포함하도록 수정
+lib/ios/libgilzoide-sqlite-net.a: lib/ios/arm64/libgilzoide-sqlite-net.a
 	mkdir -p $(dir $@)
-	lipo -create -output $@ $^
+	cp $< $@
 ifdef IOS_CODESIGN_SIGNATURE
 	$(CODESIGN) -s "$(IOS_CODESIGN_SIGNATURE)" $@
 endif
 
-# OpenSSL 링킹을 위한 iOS 특별 설정
+# OpenSSL 링킹을 위한 iOS 특별 설정 - 디바이스만 설정
 lib/ios/arm64/libgilzoide-sqlite-net.a: \
   CFLAGS += -I$(CURDIR)/openssl/build/ios-arm64/include
 lib/ios/arm64/libgilzoide-sqlite-net.a: \
   LDFLAGS += $(CURDIR)/openssl/build/ios-arm64/lib/libcrypto.a
 
-lib/ios/x86_64/libgilzoide-sqlite-net.a: \
-  CFLAGS += -I$(CURDIR)/openssl/build/ios-x86_64/include
-lib/ios/x86_64/libgilzoide-sqlite-net.a: \
-  LDFLAGS += $(CURDIR)/openssl/build/ios-x86_64/lib/libcrypto.a
+# iOS 시뮬레이터 설정 제거
 
 # Source
 $(SQLITE_NET_DEST)/%.cs: sqlite-net~/src/%.cs $(SQLITE_NET_SED_SCRIPT)
@@ -159,7 +154,6 @@ android-x86_64: lib/android/x86_64/libgilzoide-sqlite-net.so
 android-x86: lib/android/x86/libgilzoide-sqlite-net.so
 
 ios-arm64: lib/ios/arm64/libgilzoide-sqlite-net.a
-ios-simulator: lib/ios/x86_64/libgilzoide-sqlite-net.a
 ios-universal: lib/ios/libgilzoide-sqlite-net.a
 
 source: $(SQLITE_NET_DEST)/License.txt $(SQLITE_NET_DEST)/AssemblyInfo.cs $(SQLITE_NET_DEST)/SQLite.cs $(SQLITE_NET_DEST)/SQLiteAsync.cs
