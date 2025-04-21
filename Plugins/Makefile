@@ -145,6 +145,10 @@ windows-mingw-arm64: LINKFLAGS += -static-libgcc
 windows-mingw-arm64: lib/windows/arm64/gilzoide-sqlite-net.dll
 
 linux-x86_64: lib/linux/x86_64/libgilzoide-sqlite-net.so
+linux-x86: lib/linux/x86/libgilzoide-sqlite-net.so
+
+# 모든 Linux 빌드를 위한 타겟 추가
+all-linux: linux-x86_64 linux-x86
 
 macos-universal: lib/macos/libgilzoide-sqlite-net.dylib
 
