@@ -124,3 +124,45 @@ jobs:
           name: gilzoide-sqlite-net-macos
           path: |
             Plugins/lib/macos/*.dylib
+
+  build_with_ios:
+    name: iOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Clone OpenSSL
+        run: |
+          git clone --depth=1 --branch openssl-3.0.12 https://github.com/openssl/openssl.git
+          cd openssl
+
+      - name: Build OpenSSL for iOS arm64
+        run: |
+          cd openssl
+          export PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin:$PATH"
+          ./Configure ios64-cross no-shared no-tests --prefix=$PWD/build/ios-arm64
+          make clean
+          make -j$(sysctl -n hw.ncpu)
+          make install_sw
+
+      - name: Build OpenSSL for iOS Simulator x86_64
+        run: |
+          cd openssl
+          export PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin:$PATH"
+          ./Configure iossimulator-xcrun no-shared no-tests --prefix=$PWD/build/ios-x86_64
+          make clean
+          make -j$(sysctl -n hw.ncpu)
+          make install_sw
+
+      - name: Build SQLite for iOS
+        env:
+          CFLAGS: "-DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation"
+        run: make -C Plugins all-ios
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gilzoide-sqlite-net-ios
+          path: |
+            Plugins/lib/ios/*.a
+            Plugins/lib/ios/*/*.a
