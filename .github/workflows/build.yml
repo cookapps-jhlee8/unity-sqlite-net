@@ -131,25 +131,62 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
+      - name: Install dependencies
+        run: brew install perl make
+      
       - name: Clone OpenSSL
         run: |
           git clone --depth=1 --branch openssl-3.0.12 https://github.com/openssl/openssl.git
           cd openssl
-
-      - name: Build OpenSSL for iOS arm64
+      
+      - name: Build OpenSSL for iOS
         run: |
           cd openssl
+          
+          # SDK 경로 확인
+          IPHONEOS_SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
+          echo "iOS SDK Path: $IPHONEOS_SDK_PATH"
+          
+          # 헤더 파일 경로 설정 및 환경 변수 (XCode 15.4 호환성)
+          export SDKROOT=$IPHONEOS_SDK_PATH
+          export CFLAGS="-I$SDKROOT/usr/include -isysroot $SDKROOT"
+          export CROSS_TOP=$(xcrun --sdk iphoneos --show-sdk-platform-path)/Developer
+          export CROSS_SDK=$(basename $SDKROOT)
           export PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin:$PATH"
-          ./Configure ios64-cross no-shared no-tests --prefix=$PWD/build/ios-arm64
+          
+          # 디버그 정보
+          echo "CROSS_TOP: $CROSS_TOP"
+          echo "CROSS_SDK: $CROSS_SDK"
+          echo "CFLAGS: $CFLAGS"
+          
+          # Configure 명령에 명시적으로 SDK 경로와 플래그 지정
+          ./Configure ios64-xcrun no-shared no-tests no-stdio no-ui \
+            --prefix=$PWD/build/ios-arm64 \
+            -isysroot $SDKROOT \
+            $CFLAGS
+          
+          # 빌드 수행
           make clean
-          make -j$(sysctl -n hw.ncpu)
+          make -j$(sysctl -n hw.ncpu) CFLAGS="$CFLAGS"
           make install_sw
-
+          
+          # 결과물 확인
+          ls -la build/ios-arm64/lib
+          ls -la build/ios-arm64/include/openssl
+      
       - name: Build SQLite for iOS
         env:
-          CFLAGS: "-DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation"
+          CFLAGS: "-DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation -I${{ github.workspace }}/openssl/build/ios-arm64/include"
+          LDFLAGS: "-L${{ github.workspace }}/openssl/build/ios-arm64/lib -lcrypto"
         run: make -C Plugins all-ios
-
+      
+      - name: Check Build Output
+        run: |
+          ls -la Plugins/lib/ios/arm64
+          ls -la Plugins/lib/ios
+          file Plugins/lib/ios/libgilzoide-sqlite-net.a
+          file Plugins/lib/ios/arm64/libgilzoide-sqlite-net.a
+      
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -157,30 +194,3 @@ jobs:
           path: |
             Plugins/lib/ios/*.a
             Plugins/lib/ios/*/*.a
-
-      - name: Build OpenSSL for iOS
-        run: |
-          cd openssl
-          
-          # SDK 경로 확인
-          IPHONEOS_SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
-          
-          echo "iOS SDK Path: $IPHONEOS_SDK_PATH"
-          
-          # iOS 디바이스용 OpenSSL 빌드 (arm64)
-          export CROSS_TOP=$(xcrun --sdk iphoneos --show-sdk-platform-path)/Developer
-          export CROSS_SDK=$(basename $IPHONEOS_SDK_PATH)
-          export CC="$(xcrun -f clang) -arch arm64 -isysroot $IPHONEOS_SDK_PATH"
-          
-          echo "CROSS_TOP: $CROSS_TOP"
-          echo "CROSS_SDK: $CROSS_SDK"
-          echo "CC: $CC"
-          
-          # Configure 명령에 명시적으로 SDK 경로 지정
-          ./Configure ios64-xcrun no-shared no-tests \
-            --prefix=$PWD/build/ios-arm64 \
-            -isysroot $IPHONEOS_SDK_PATH
-            
-          make clean
-          make -j$(sysctl -n hw.ncpu)
-          make install_sw
