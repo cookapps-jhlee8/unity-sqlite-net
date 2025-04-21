@@ -55,6 +55,18 @@ RUN ls -la /src/openssl/build/
 RUN find /src/openssl/build/ -name "crypto.h" | xargs ls -la
 RUN find /output/openssl/ -name "crypto.h" | xargs ls -la
 
+# 라이브러리 파일 경로 확인
+RUN find /src/openssl/build/ -name "libcrypto.a" | xargs ls -la
+RUN find /output/openssl/ -name "libcrypto.a" | xargs ls -la
+
+# 디렉토리 구조 전체 확인
+RUN ls -R /src/openssl/build/
+RUN ls -R /output/openssl/
+
+# 복사 명령 확인
+RUN echo "OpenSSL 빌드 디렉토리 및 라이브러리 위치 확인:"
+RUN du -sh /src/openssl/build/* /output/openssl/*
+
 # 7. 로컬 헤더 심볼릭 링크 생성
 RUN mkdir -p /usr/include/openssl
 RUN for ABI in arm64-v8a armeabi-v7a; do \
