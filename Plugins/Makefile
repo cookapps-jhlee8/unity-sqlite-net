@@ -9,7 +9,7 @@ GITHUB_REPO ?= gilzoide/unity-sqlite-net
 RUN_ID ?=
 
 # 암호화 라이브러리 설정
-CFLAGS += -DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation -Iopenssl -I/usr/include
+CFLAGS += -DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation -Iopenssl
 LDFLAGS += -lcrypto
 
 ifeq ($(DEBUG),1)
@@ -132,7 +132,7 @@ android-x86: lib/android/x86/libgilzoide-sqlite-net.so
 
 source: $(SQLITE_NET_DEST)/License.txt $(SQLITE_NET_DEST)/AssemblyInfo.cs $(SQLITE_NET_DEST)/SQLite.cs $(SQLITE_NET_DEST)/SQLiteAsync.cs
 
-all-android: android-arm64 android-arm32 android-x86_64 android-x86
+all-android: android-arm64 android-arm32 # android-x86_64 android-x86
 all-apple:
 	@mkdir -p lib/macos
 
