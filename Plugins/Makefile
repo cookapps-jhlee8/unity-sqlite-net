@@ -11,10 +11,10 @@ RUN_ID ?=
 # 암호화 라이브러리 설정
 CFLAGS += -DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation #-Iopenssl
 
-# 기본값 설정 (Android가 아닌 경우에만 사용)
-ifneq ($(findstring android,$(MAKECMDGOALS)),android)
-  LDFLAGS += -lcrypto
-endif
+# 기본값 설정 삭제하고 Windows와 Linux에만 -lcrypto 적용
+# ifneq ($(findstring android,$(MAKECMDGOALS)),android)
+#   LDFLAGS += -lcrypto
+# endif
 
 ifeq ($(DEBUG),1)
 	CFLAGS += -O0 -g -DDEBUG
@@ -44,18 +44,20 @@ lib/%/sqlite3.o~: $(SQLITE_SRC) | lib/%
 
 # Windows
 lib/windows/%/gilzoide-sqlite-net.dll: LINKFLAGS += -shared
+lib/windows/%/gilzoide-sqlite-net.dll: LDFLAGS += -lcrypto
 lib/windows/%/gilzoide-sqlite-net.dll: lib/windows/%/sqlite3.o~ | lib/windows/%
 	$(CC) -o $@ $^ $(LDFLAGS) $(LINKFLAGS)
 
 # Linux
 lib/linux/%/libgilzoide-sqlite-net.so: CFLAGS += -fPIC
 lib/linux/%/libgilzoide-sqlite-net.so: LINKFLAGS += -shared -lm
+lib/linux/%/libgilzoide-sqlite-net.so: LDFLAGS += -lcrypto
 lib/linux/%/libgilzoide-sqlite-net.so: lib/linux/%/sqlite3.o~ | lib/linux/%
 	$(CC) -o $@ $^ $(LINKFLAGS)
 
 # macOS
-lib/macos/libgilzoide-sqlite-net.dylib: CFLAGS += -arch arm64 -arch x86_64 -isysroot $(shell xcrun --show-sdk-path --sdk macosx) -I$(CURDIR)/openssl/build/universal/include
-lib/macos/libgilzoide-sqlite-net.dylib: LINKFLAGS += -shared -arch arm64 -arch x86_64 -L$(CURDIR)/openssl/build/universal/lib -lcrypto
+lib/macos/libgilzoide-sqlite-net.dylib: CFLAGS += -arch arm64 -arch x86_64 -isysroot $(shell xcrun --show-sdk-path --sdk macosx) -I$(PWD)/../openssl/build/universal/include
+lib/macos/libgilzoide-sqlite-net.dylib: LINKFLAGS += -shared -arch arm64 -arch x86_64 -L$(PWD)/../openssl/build/universal/lib -lcrypto
 lib/macos/libgilzoide-sqlite-net.dylib: lib/macos/sqlite3.o~ | lib/macos
 	$(CC) -o $@ $^ $(LINKFLAGS)
 ifdef MACOS_CODESIGN_SIGNATURE
