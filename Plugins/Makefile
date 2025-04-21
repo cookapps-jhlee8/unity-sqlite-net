@@ -8,6 +8,9 @@ GITHUB_CLI_BIN ?= gh
 GITHUB_REPO ?= gilzoide/unity-sqlite-net
 RUN_ID ?=
 
+# 암호화 라이브러리 설정
+CFLAGS += -DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation
+
 ifeq ($(DEBUG),1)
 	CFLAGS += -O0 -g -DDEBUG
 else
