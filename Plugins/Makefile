@@ -10,7 +10,11 @@ RUN_ID ?=
 
 # 암호화 라이브러리 설정
 CFLAGS += -DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation #-Iopenssl
-LDFLAGS += -lcrypto
+
+# 기본값 설정 (Android가 아닌 경우에만 사용)
+ifneq ($(findstring android,$(MAKECMDGOALS)),android)
+  LDFLAGS += -lcrypto
+endif
 
 ifeq ($(DEBUG),1)
 	CFLAGS += -O0 -g -DDEBUG
@@ -64,20 +68,20 @@ endif
 
 # arm64
 lib/android/arm64/libgilzoide-sqlite-net.so: \
-  CFLAGS += -Ioutput/openssl/arm64-v8a/include
+  CFLAGS += -I/output/openssl/arm64-v8a/include
 lib/android/arm64/libgilzoide-sqlite-net.so: \
-  LDFLAGS += output/openssl/build/arm64-v8a/lib/libcrypto.a
+  LDFLAGS += /output/openssl/build/arm64-v8a/lib/libcrypto.a
 
 # arm32
 lib/android/arm32/libgilzoide-sqlite-net.so: \
-  CFLAGS += -Ioutput/openssl/armeabi-v7a/include
+  CFLAGS += -I/output/openssl/armeabi-v7a/include
 lib/android/arm32/libgilzoide-sqlite-net.so: \
-  LDFLAGS += output/openssl/build/armeabi-v7a/lib/libcrypto.a
+  LDFLAGS += /output/openssl/build/armeabi-v7a/lib/libcrypto.a
 
 lib/android/%/libgilzoide-sqlite-net.so: CFLAGS += -fPIC
 lib/android/%/libgilzoide-sqlite-net.so: LINKFLAGS += -shared -lm -Wl,-z,max-page-size=16384
 lib/android/%/libgilzoide-sqlite-net.so: lib/android/%/sqlite3.o~ check-ndk-root | lib/android/%
-	$(CC) -o $@ $< $(LINKFLAGS)
+	$(CC) -o $@ $< $(LDFLAGS) $(LINKFLAGS)
 
 lib/android/arm64/libgilzoide-sqlite-net.so: CC = $(wildcard $(ANDROID_NDK_ROOT)/toolchains/llvm/prebuilt/*/bin/aarch64-linux-android21-clang)
 lib/android/arm32/libgilzoide-sqlite-net.so: CC = $(wildcard $(ANDROID_NDK_ROOT)/toolchains/llvm/prebuilt/*/bin/armv7a-linux-androideabi21-clang)
