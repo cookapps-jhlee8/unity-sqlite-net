@@ -35,15 +35,16 @@ jobs:
         with:
           name: gilzoide-sqlite-net-${{ matrix.platform }}
           path: |
-            Plugins/lib/${{ matrix.platform }}/**/*.dll
-            Plugins/lib/${{ matrix.platform }}/**/*.dylib
-            Plugins/lib/${{ matrix.platform }}/**/*.so
-            Plugins/lib/${{ matrix.platform }}/openssl/**/*.a
-            Plugins/lib/${{ matrix.platform }}/openssl/**/*.so
-            build/openssl/**/*.a
-            build/openssl/**/*.so
-            /src/openssl/build/**/*.a
-            /src/openssl/build/**/*.so
+            **/*
+            # Plugins/lib/${{ matrix.platform }}/**/*.dll
+            # Plugins/lib/${{ matrix.platform }}/**/*.dylib
+            # Plugins/lib/${{ matrix.platform }}/**/*.so
+            # Plugins/lib/${{ matrix.platform }}/openssl/**/*.a
+            # Plugins/lib/${{ matrix.platform }}/openssl/**/*.so
+            # build/openssl/**/*.a
+            # build/openssl/**/*.so
+            # /src/openssl/build/**/*.a
+            # /src/openssl/build/**/*.so
 
   build_with_windows:
     name: windows
