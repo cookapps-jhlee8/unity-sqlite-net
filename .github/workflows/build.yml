@@ -85,7 +85,7 @@ jobs:
           cp -R build/arm64/include build/universal/include
       - name: Build
         env:
-          CFLAGS: "-DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation -I/opt/homebrew/opt/openssl@3/include"
+          CFLAGS: "-DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation -I${{ github.workspace }}/openssl/build/universal/include"
           LDFLAGS: "-L${{ github.workspace }}/openssl/build/universal/lib -lcrypto"
         run: make -C Plugins all-apple
       - name: Upload artifact
