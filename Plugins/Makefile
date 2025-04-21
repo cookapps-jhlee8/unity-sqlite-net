@@ -62,6 +62,30 @@ ifndef ANDROID_NDK_ROOT
 	$(error ANDROID_NDK_ROOT must be set for Android builds!)
 endif
 
+# arm64
+lib/android/arm64/libgilzoide-sqlite-net.so: \
+  CFLAGS += -Iopenssl/build/arm64-v8a/include
+lib/android/arm64/libgilzoide-sqlite-net.so: \
+  LDFLAGS += openssl/build/arm64-v8a/lib/libcrypto.a
+
+# arm32
+lib/android/arm32/libgilzoide-sqlite-net.so: \
+  CFLAGS += -Iopenssl/build/armeabi-v7a/include
+lib/android/arm32/libgilzoide-sqlite-net.so: \
+  LDFLAGS += openssl/build/armeabi-v7a/lib/libcrypto.a
+
+# x86_64
+lib/android/x86_64/libgilzoide-sqlite-net.so: \
+  CFLAGS += -Iopenssl/build/x86_64/include
+lib/android/x86_64/libgilzoide-sqlite-net.so: \
+  LDFLAGS += openssl/build/x86_64/lib/libcrypto.a
+
+# x86
+lib/android/x86/libgilzoide-sqlite-net.so: \
+  CFLAGS += -Iopenssl/build/x86/include
+lib/android/x86/libgilzoide-sqlite-net.so: \
+  LDFLAGS += openssl/build/x86/lib/libcrypto.a
+
 lib/android/%/libgilzoide-sqlite-net.so: CFLAGS += -fPIC
 lib/android/%/libgilzoide-sqlite-net.so: LINKFLAGS += -shared -lm -Wl,-z,max-page-size=16384
 lib/android/%/libgilzoide-sqlite-net.so: lib/android/%/sqlite3.o~ check-ndk-root | lib/android/%
