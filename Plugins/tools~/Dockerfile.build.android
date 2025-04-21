@@ -40,10 +40,11 @@ RUN for ABI in \
     CC_BIN=$TOOLCHAIN/${HOST}21-clang; \
     AR_BIN=$TOOLCHAIN/llvm-ar; \
     echo "CC: $CC_BIN"; echo "AR: $AR_BIN"; \
-    if [ ! -f "$CC_BIN" ]; then echo "❌ CC_BIN not found: $CC_BIN"; exit 1; fi; \
-    if [ ! -f "$AR_BIN" ]; then echo "❌ AR_BIN not found: $AR_BIN"; exit 1; fi; \
+    [ -f "$CC_BIN" ] || (echo "❌ CC not found: $CC_BIN" && exit 1); \
+    [ -f "$AR_BIN" ] || (echo "❌ AR not found: $AR_BIN" && exit 1); \
     cd /src/openssl && make clean || true; \
     ./Configure $CONFIGURE_NAME no-shared no-tests --prefix=/src/openssl/build/$ABI_NAME && \
     make CC=$CC_BIN AR=$AR_BIN -j$(nproc) && \
-    make install_sw; \
+    make install_sw && \
+    cp -r /src/openssl/build/$ABI_NAME/include/openssl /opt/ndk/sysroot/usr/include/openssl-$ABI_NAME; \
   done
