@@ -25,7 +25,7 @@ ENV PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
 
 # 3. OpenSSL 소스 다운로드
 WORKDIR /src
-RUN git clone --depth=1 --branch openssl-3.4.1 https://github.com/openssl/openssl.git
+RUN git clone --depth=1 --branch openssl-3.0.12 https://github.com/openssl/openssl.git
 
 # 4. OpenSSL 빌드 (arm64-v8a, armeabi-v7a 전용)
 RUN for ABI in \
@@ -46,13 +46,25 @@ RUN for ABI in \
     make install_sw; \
   done
 
-# 5. OpenSSL 빌드 결과 복사
+# 5. OpenSSL 빌드 결과 복사 및 확인
 RUN mkdir -p /output/openssl
 RUN cp -r /src/openssl/build/* /output/openssl/
 
-# 6. OpenSSL 빌드 결과 확인
-RUN ls -R /output/openssl
+# 6. 빌드 결과 디버깅
+RUN ls -la /src/openssl/build/
+RUN find /src/openssl/build/ -name "crypto.h" | xargs ls -la
+RUN find /output/openssl/ -name "crypto.h" | xargs ls -la
 
-# 7. 작업 디렉토리 설정
+# 7. 로컬 헤더 심볼릭 링크 생성
+RUN mkdir -p /usr/include/openssl
+RUN for ABI in arm64-v8a armeabi-v7a; do \
+    if [ -d "/src/openssl/build/$ABI/include/openssl" ]; then \
+      echo "Linking OpenSSL headers from $ABI"; \
+      ln -sf /src/openssl/build/$ABI/include/openssl/* /usr/include/openssl/; \
+      break; \
+    fi; \
+  done
+
+# 8. 작업 디렉토리 설정
 WORKDIR /output
 
