@@ -36,9 +36,12 @@ RUN for ABI in \
     CONFIGURE_NAME=$2; \
     HOST=$3; \
     echo "====> Building OpenSSL for $ABI_NAME"; \
+    which $HOST21-clang || (echo "❌ $HOST21-clang not found!" && exit 1); \
+    which $HOST-ar || (echo "❌ $HOST-ar not found!" && exit 1); \
     cd /src/openssl && make clean || true; \
-    CC=$HOST21-clang AR=$HOST-ar \
     ./Configure $CONFIGURE_NAME no-shared no-tests --prefix=/src/openssl/build/$ABI_NAME && \
-    make -j$(nproc) && \
+    make CC=$HOST21-clang AR=$HOST-ar -j$(nproc) && \
     make install_sw; \
   done
+
+
