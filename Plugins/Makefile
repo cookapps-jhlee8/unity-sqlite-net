@@ -79,7 +79,8 @@ lib/android/arm32/libgilzoide-sqlite-net.so: \
   LDFLAGS += /output/openssl/armeabi-v7a/lib/libcrypto.a
 
 # 명시적으로 동적 라이브러리 생성 플래그 추가
-lib/android/%/libgilzoide-sqlite-net.so: LINKFLAGS += -shared -lm -Wl,-z,max-page-size=16384 -Wl,--no-undefined -Wl,--gc-sections
+# Android 특정 라이브러리 추가 (-llog)
+lib/android/%/libgilzoide-sqlite-net.so: LINKFLAGS += -shared -lm -llog -Wl,-z,max-page-size=16384 -Wl,--no-undefined -Wl,--gc-sections
 
 lib/android/%/libgilzoide-sqlite-net.so: lib/android/%/sqlite3.o~ check-ndk-root | lib/android/%
 	$(CC) -o $@ $< $(LDFLAGS) $(LINKFLAGS)
