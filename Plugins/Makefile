@@ -9,8 +9,7 @@ GITHUB_REPO ?= gilzoide/unity-sqlite-net
 RUN_ID ?=
 
 # 암호화 라이브러리 설정
-CFLAGS += -DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation
-CFLAGS += $(if $(filter $(OS),Windows_NT linux darwin),-I/usr/include)
+CFLAGS += -DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation -Iopenssl -I/usr/include
 LDFLAGS += -lcrypto
 
 ifeq ($(DEBUG),1)
@@ -65,15 +64,27 @@ endif
 
 # arm64
 lib/android/arm64/libgilzoide-sqlite-net.so: \
-  CFLAGS += -I/opt/ndk/sysroot/usr/include/openssl-arm64-v8a
+  CFLAGS += -Iopenssl/build/arm64-v8a/include
 lib/android/arm64/libgilzoide-sqlite-net.so: \
-  LDFLAGS += /src/openssl/build/arm64-v8a/lib/libcrypto.a
+  LDFLAGS += openssl/build/arm64-v8a/lib/libcrypto.a
 
 # arm32
 lib/android/arm32/libgilzoide-sqlite-net.so: \
-  CFLAGS += -I/opt/ndk/sysroot/usr/include/openssl-armeabi-v7a
+  CFLAGS += -Iopenssl/build/armeabi-v7a/include
 lib/android/arm32/libgilzoide-sqlite-net.so: \
-  LDFLAGS += /src/openssl/build/armeabi-v7a/lib/libcrypto.a
+  LDFLAGS += openssl/build/armeabi-v7a/lib/libcrypto.a
+
+# x86_64
+lib/android/x86_64/libgilzoide-sqlite-net.so: \
+  CFLAGS += -Iopenssl/build/x86_64/include
+lib/android/x86_64/libgilzoide-sqlite-net.so: \
+  LDFLAGS += openssl/build/x86_64/lib/libcrypto.a
+
+# x86
+lib/android/x86/libgilzoide-sqlite-net.so: \
+  CFLAGS += -Iopenssl/build/x86/include
+lib/android/x86/libgilzoide-sqlite-net.so: \
+  LDFLAGS += openssl/build/x86/lib/libcrypto.a
 
 lib/android/%/libgilzoide-sqlite-net.so: CFLAGS += -fPIC
 lib/android/%/libgilzoide-sqlite-net.so: LINKFLAGS += -shared -lm -Wl,-z,max-page-size=16384
