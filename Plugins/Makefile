@@ -9,7 +9,8 @@ GITHUB_REPO ?= gilzoide/unity-sqlite-net
 RUN_ID ?=
 
 # 암호화 라이브러리 설정
-CFLAGS += -DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation -I/usr/include
+CFLAGS += -DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation
+CFLAGS += $(if $(filter $(OS),Windows_NT linux darwin),-I/usr/include)
 LDFLAGS += -lcrypto
 
 ifeq ($(DEBUG),1)
