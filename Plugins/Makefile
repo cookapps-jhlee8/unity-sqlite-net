@@ -39,7 +39,7 @@ lib/%/sqlite3.o~: $(SQLITE_SRC) | lib/%
 # Windows
 lib/windows/%/gilzoide-sqlite-net.dll: LINKFLAGS += -shared
 lib/windows/%/gilzoide-sqlite-net.dll: lib/windows/%/sqlite3.o~ | lib/windows/%
-	$(CC) -o $@ $^ $(LINKFLAGS)
+	$(CC) -o $@ $^ $(LDFLAGS) $(LINKFLAGS)
 
 # Linux
 lib/linux/%/libgilzoide-sqlite-net.so: CFLAGS += -fPIC
