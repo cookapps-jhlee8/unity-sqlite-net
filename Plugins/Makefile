@@ -109,17 +109,12 @@ lib/ios/arm64/libgilzoide-sqlite-net.a: CC = $(shell xcrun -f clang)
 
 # iOS 시뮬레이터 관련 부분 제거
 
-# iOS 통합 정적 라이브러리 수정 부분
-lib/ios/libgilzoide-sqlite-net.a: lib/ios/arm64/libgilzoide-sqlite-net.a $(OPENSSL_DIR)/build/ios-arm64/lib/libcrypto.a
-    # 두 라이브러리 결합 (SQLite + OpenSSL)
-    mkdir -p tmp_ios_lib
-    cd tmp_ios_lib && \
-        $(AR) x ../$(OPENSSL_DIR)/build/ios-arm64/lib/libcrypto.a && \
-        $(AR) x ../$<
-    $(AR) rcs $@ tmp_ios_lib/*.o
-    rm -rf tmp_ios_lib
+# iOS 통합 정적 라이브러리 - 디바이스만 포함하도록 수정
+lib/ios/libgilzoide-sqlite-net.a: lib/ios/arm64/libgilzoide-sqlite-net.a
+	mkdir -p $(dir $@)
+	cp $< $@
 ifdef IOS_CODESIGN_SIGNATURE
-    $(CODESIGN) -s "$(IOS_CODESIGN_SIGNATURE)" $@
+	$(CODESIGN) -s "$(IOS_CODESIGN_SIGNATURE)" $@
 endif
 
 # OpenSSL 링킹을 위한 iOS 특별 설정 - 디바이스만 설정
