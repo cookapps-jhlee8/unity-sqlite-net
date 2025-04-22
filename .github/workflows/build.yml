@@ -193,7 +193,13 @@ jobs:
         env:
           CFLAGS: "-DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation -I${{ github.workspace }}/openssl/build/ios-arm64/include"
           LDFLAGS: "-L${{ github.workspace }}/openssl/build/ios-arm64/lib -lcrypto"
-        run: make -C Plugins all-ios
+        run: |
+          cd Plugins
+          # 경로 확인
+          ls -la ${{ github.workspace }}/openssl/build/ios-arm64/lib/ || echo "OpenSSL lib directory not found"
+          
+          # OPENSSL_DIR을 절대 경로로 지정
+          make all-ios OPENSSL_DIR="${{ github.workspace }}/openssl"
       
       - name: Check Build Output
         run: |
