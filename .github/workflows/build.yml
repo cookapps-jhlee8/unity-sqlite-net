@@ -162,38 +162,30 @@ jobs:
           IPHONEOS_SDK_PATH=$(xcrun --sdk iphoneos --show-sdk-path)
           echo "iOS SDK Path: $IPHONEOS_SDK_PATH"
           
-          # 헤더 파일 경로 설정 및 환경 변수 (XCode 15.4 호환성)
-          export SDKROOT=$IPHONEOS_SDK_PATH
-          export CFLAGS="-I$SDKROOT/usr/include -isysroot $SDKROOT"
-          export CROSS_TOP=$(xcrun --sdk iphoneos --show-sdk-platform-path)/Developer
-          export CROSS_SDK=$(basename $SDKROOT)
-          export PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin:$PATH"
-          
-          # 디버그 정보
-          echo "CROSS_TOP: $CROSS_TOP"
-          echo "CROSS_SDK: $CROSS_SDK"
-          echo "CFLAGS: $CFLAGS"
-          
-          # Configure 명령에 명시적으로 SDK 경로와 플래그 지정
-          ./Configure ios64-xcrun no-shared no-tests no-stdio no-ui \
+          # Configure 명령 수정 - 암호화 모듈 명시적 활성화
+          ./Configure ios64-xcrun no-shared no-tests enable-ec_nistp_64_gcc_128 \
             --prefix=$PWD/build/ios-arm64 \
-            -isysroot $SDKROOT \
-            $CFLAGS
+            -isysroot $IPHONEOS_SDK_PATH
           
           # 빌드 수행
           make clean
-          make -j$(sysctl -n hw.ncpu) CFLAGS="$CFLAGS"
+          make -j$(sysctl -n hw.ncpu)
           make install_sw
           
-          # 결과물 확인
-          ls -la build/ios-arm64/lib
-          ls -la build/ios-arm64/include/openssl
+          # RAND_bytes 심볼 존재 확인
+          nm build/ios-arm64/lib/libcrypto.a | grep RAND_bytes || echo "RAND_bytes 심볼이 없습니다!"
       
       - name: Build SQLite for iOS
         env:
           CFLAGS: "-DSQLITE_HAS_CODEC -DSQLCIPHER_CRYPTO_OPENSSL -Isqlite-amalgamation -I${{ github.workspace }}/openssl/build/ios-arm64/include"
           LDFLAGS: "-L${{ github.workspace }}/openssl/build/ios-arm64/lib -lcrypto"
-        run: make -C Plugins all-ios
+        run: |
+          cd Plugins
+          # 링크 문제 디버깅
+          echo "OpenSSL libcrypto.a 존재 여부: $(test -f ${{ github.workspace }}/openssl/build/ios-arm64/lib/libcrypto.a && echo '예' || echo '아니오')"
+          
+          # 명시적으로 OpenSSL 디렉토리 지정
+          make all-ios OPENSSL_DIR="${{ github.workspace }}/openssl"
       
       - name: Check Build Output
         run: |
